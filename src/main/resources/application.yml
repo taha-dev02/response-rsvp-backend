@@ -1,0 +1,205 @@
+# ============================================================================
+# Response RSVP - Production Configuration for Render
+# ============================================================================
+
+spring:
+  application:
+    name: rsvp-backend
+
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:prod}
+
+  # ============================================================================
+  # DATABASE CONFIGURATION - Supabase PostgreSQL
+  # ============================================================================
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+    hikari:
+      maximum-pool-size: ${HIKARI_MAX_POOL:10}
+      minimum-idle: ${HIKARI_MIN_IDLE:3}
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1800000
+      leak-detection-threshold: 60000
+      connection-test-query: SELECT 1
+      pool-name: RSVPHikariPool
+
+      data-source-properties:
+        ssl: true
+        sslmode: require
+        preferIPv4Stack: true
+
+  # ============================================================================
+  # JPA/HIBERNATE CONFIGURATION
+  # ============================================================================
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: ${DDL_AUTO:validate}
+    show-sql: ${SHOW_SQL:false}
+
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+        default_batch_fetch_size: 10
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+        generate_statistics: false
+        query:
+          plan_cache_max_size: 2048
+
+  # ============================================================================
+  # CACHE CONFIGURATION
+  # ============================================================================
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=5m
+    cache-names: events,eventById,guests,guestById,rsvps,dashboardMetrics
+
+  # ============================================================================
+  # JACKSON JSON CONFIGURATION
+  # ============================================================================
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+      indent-output: false
+    deserialization:
+      fail-on-unknown-properties: false
+    default-property-inclusion: non_null
+
+# ============================================================================
+# SERVER CONFIGURATION
+# ============================================================================
+server:
+  port: ${PORT:8080}
+
+  compression:
+    enabled: true
+    mime-types: application/json,text/html,text/xml,text/plain
+    min-response-size: 1024
+
+  error:
+    include-message: ${ERROR_INCLUDE_MESSAGE:never}
+    include-binding-errors: ${ERROR_INCLUDE_BINDING:never}
+    include-stacktrace: never
+
+  tomcat:
+    use-native: false
+    connection-timeout: 20000
+    threads:
+      max: 200
+      min-spare: 10
+    max-connections: 8192
+
+# ============================================================================
+# LOGGING CONFIGURATION
+# ============================================================================
+logging:
+  level:
+    root: ${LOG_LEVEL:INFO}
+    com.rsvp: ${APP_LOG_LEVEL:INFO}
+    org.springframework.web: WARN
+    org.springframework.security: WARN
+    org.hibernate: WARN
+    com.zaxxer.hikari: INFO
+
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# ============================================================================
+# ACTUATOR & MONITORING
+# ============================================================================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+      base-path: /actuator
+
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+
+# ============================================================================
+# CORS CONFIGURATION
+# ============================================================================
+cors:
+  allowed-origins: ${CORS_ORIGINS}
+  allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+  allowed-headers: "*"
+  max-age: 3600
+
+# ============================================================================
+# SECURITY & JWT
+# ============================================================================
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+security:
+  api-key: ${API_KEY}
+
+# ============================================================================
+# ADMIN CREDENTIALS
+# ============================================================================
+admin:
+  username: ${ADMIN_USERNAME}
+  password: ${ADMIN_PASSWORD}
+
+# ============================================================================
+# APPLICATION INFO
+# ============================================================================
+info:
+  app:
+    name: Response RSVP Backend
+    description: RSVP and Event Invitation Management System
+    version: 1.0.0
+    environment: ${SPRING_PROFILES_ACTIVE:production}
+
+---
+# ============================================================================
+# DEV PROFILE (Local Development)
+# ============================================================================
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+server:
+  error:
+    include-message: always
+    include-binding-errors: always
+
+logging:
+  level:
+    com.rsvp: DEBUG
+    org.hibernate.SQL: DEBUG
+
+management:
+  endpoint:
+    health:
+      show-details: always
