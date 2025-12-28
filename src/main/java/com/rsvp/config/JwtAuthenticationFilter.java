@@ -1,10 +1,12 @@
 package com.rsvp.config;
 
 import com.rsvp.repository.UserRepository;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,6 +18,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired
@@ -47,37 +50,48 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String jwt = authHeader.substring(7);
-        String username;
+        String username = null;
 
         try {
             username = jwtTokenUtil.extractUsername(jwt);
+        } catch (ExpiredJwtException e) {
+            log.warn("JWT token expired for request: {} {}", method, path);
+            // Don't log full stack trace for expired tokens - it's expected behavior
+            filterChain.doFilter(request, response);
+            return;
         } catch (Exception e) {
-            logger.error("Invalid JWT token", e);
+            log.error("Invalid JWT token: {}", e.getMessage());
             filterChain.doFilter(request, response);
             return;
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            if (jwtTokenUtil.validateToken(jwt, username)) {
+            try {
+                if (jwtTokenUtil.validateToken(jwt, username)) {
 
-                UserDetails userDetails = userRepository.findByUsername(username)
-                        .orElse(null);
+                    UserDetails userDetails = userRepository.findByUsername(username)
+                            .orElse(null);
 
-                if (userDetails != null) {
-                    UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(
-                                    userDetails,
-                                    null,
-                                    userDetails.getAuthorities()
-                            );
+                    if (userDetails != null) {
+                        UsernamePasswordAuthenticationToken authToken =
+                                new UsernamePasswordAuthenticationToken(
+                                        userDetails,
+                                        null,
+                                        userDetails.getAuthorities()
+                                );
 
-                    authToken.setDetails(
-                            new WebAuthenticationDetailsSource().buildDetails(request)
-                    );
+                        authToken.setDetails(
+                                new WebAuthenticationDetailsSource().buildDetails(request)
+                        );
 
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                        SecurityContextHolder.getContext().setAuthentication(authToken);
+                    }
                 }
+            } catch (ExpiredJwtException e) {
+                log.warn("JWT token expired during validation");
+            } catch (Exception e) {
+                log.error("Error validating token: {}", e.getMessage());
             }
         }
 
@@ -91,12 +105,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         // Actuator endpoints
-        if (path.startsWith("/actuator/health") || path.startsWith("/actuator/info")) {
+        if (path.startsWith("/actuator")) {
             return true;
         }
 
-        // Public event endpoint: /api/events/{id}/public
-        if ("GET".equals(method) && path.matches("/api/events/\\d+/public")) {
+        // Public RSVP endpoints (guest submissions without login)
+        if (path.matches("/api/rsvp/.*")) {
+            return true;
+        }
+
+        // Public event endpoint
+        if ("GET".equals(method) && path.matches("/api/events/.*/public")) {
             return true;
         }
 
@@ -106,7 +125,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         // Tracking endpoints
-        if (path.startsWith("/api/tracking/")) {
+        if (path.startsWith("/api/tracking")) {
+            return true;
+        }
+
+        // Public guest endpoints (for RSVP pages)
+        if (path.startsWith("/api/guests/token/")) {
             return true;
         }
 

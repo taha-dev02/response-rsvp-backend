@@ -49,4 +49,5 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
     // Delete old logs (for cleanup jobs)
     @Query("DELETE FROM AuditLog a WHERE a.timestamp < :cutoffDate")
     void deleteOldLogs(@Param("cutoffDate") LocalDateTime cutoffDate);
+
 }
