@@ -28,6 +28,7 @@ spring:
       connection-test-query: SELECT 1
       pool-name: RSVPHikariPool
       keepalive-time: 300000
+      connection-init-sql: DEALLOCATE ALL
 
       auto-commit: true
       initialization-fail-timeout: 1
