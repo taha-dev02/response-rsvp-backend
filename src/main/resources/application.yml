@@ -36,6 +36,7 @@ spring:
       data-source-properties:
         ssl: true
         sslmode: require
+        prepareThreshold: 0
         preferIPv4Stack: true
         prepStmtCacheSize: 25
         prepStmtCacheSqlLimit: 256
