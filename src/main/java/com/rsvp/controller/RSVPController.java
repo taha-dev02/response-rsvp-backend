@@ -16,7 +16,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/rsvps")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"})
+@CrossOrigin(origins = {"http://localhost:3000", "https://response-rsvp.vercel.app"})
 public class RSVPController {
 
     private final RSVPRepository rsvpRepository;

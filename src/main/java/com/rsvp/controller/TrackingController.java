@@ -14,7 +14,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/tracking")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"})
+@CrossOrigin(origins = {"http://localhost:3000", "https://response-rsvp.vercel.app"})
 public class TrackingController {
 
     private final RSVPLinkClickRepository linkClickRepository;
