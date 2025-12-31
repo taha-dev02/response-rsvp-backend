@@ -110,8 +110,8 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:3000",
                 "http://localhost:5173",
-                "${CORS_ORIGINS:https://your-app.vercel.app,http://localhost:5173}",
-                "https://www.yourdomain.com"
+                "${CORS_ORIGINS:https://response-rsvp.vercel.app}",
+                "https://response-rsvp-frontend-dwk3-6verzgpjb.vercel.app"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
