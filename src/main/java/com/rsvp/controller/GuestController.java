@@ -83,13 +83,24 @@ public class GuestController {
 
     @GetMapping
     public ResponseEntity<List<GuestResponse>> getAllGuests(
-            @RequestParam(required = false) String groupName) {
+            @RequestParam(required = false) String groupName,
+            @RequestParam(required = false) Long eventId) {
         List<GuestResponse> guests;
-        if (groupName != null) {
+        if (eventId != null) {
+            guests = guestService.getGuestsByEventId(eventId);
+        } else if (groupName != null) {
             guests = guestService.getGuestsByGroup(groupName);
         } else {
             guests = guestService.getAllGuests();
         }
+        return ResponseEntity.ok(guests);
+    }
+
+    // Public endpoint for automation - no authentication required
+    @GetMapping("/automation")
+    public ResponseEntity<List<GuestResponse>> getGuestsForAutomation(
+            @RequestParam Long eventId) {
+        List<GuestResponse> guests = guestService.getGuestsByEventId(eventId);
         return ResponseEntity.ok(guests);
     }
 

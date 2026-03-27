@@ -87,6 +87,15 @@ public class GuestService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public List<GuestResponse> getGuestsByEventId(Long eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + eventId));
+        return guestRepository.findByEventIdWithEvent(eventId).stream()
+                .map(GuestResponse::fromEntity)
+                .collect(Collectors.toList());
+    }
+
 
     @Transactional
     public void deleteGuest(Long id) {

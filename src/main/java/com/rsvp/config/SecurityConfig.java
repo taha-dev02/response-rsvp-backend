@@ -64,6 +64,7 @@ public class SecurityConfig {
                         // ✅ PUBLIC RSVP PAGE ENDPOINTS
                         .requestMatchers(HttpMethod.GET, "/api/events/*/public").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/guests/by-guest-id/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/guests/automation").permitAll()
 
                         // ✅ PUBLIC RSVP SUBMISSION & CHECKING
                         .requestMatchers(HttpMethod.POST, "/api/rsvps/submit").permitAll()
@@ -80,6 +81,14 @@ public class SecurityConfig {
                         // ========== SYSTEM-ONLY ENDPOINTS ==========
                         .requestMatchers(HttpMethod.POST, "/api/rsvps/sync").hasRole("SYSTEM")
                         .requestMatchers(HttpMethod.POST, "/api/whatsapp/sync").hasRole("SYSTEM")
+                        
+                        // ========== WHATSAPP AUTOMATION (ADMIN & USER) ==========
+                        .requestMatchers(HttpMethod.POST, "/api/whatsapp/trigger-automation").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.GET, "/api/whatsapp/automation-status/*").hasAnyRole("ADMIN", "USER")
+                        
+                        // ========== WHATSAPP AUTOMATION (ADMIN & USER) ==========
+                        .requestMatchers(HttpMethod.POST, "/api/whatsapp/trigger-automation").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.GET, "/api/whatsapp/automation-status/*").hasAnyRole("ADMIN", "USER")
 
                         // ========== EVENT MANAGEMENT (ADMIN & USER) ==========
                         .requestMatchers(HttpMethod.POST, "/api/events").hasAnyRole("ADMIN", "USER")
