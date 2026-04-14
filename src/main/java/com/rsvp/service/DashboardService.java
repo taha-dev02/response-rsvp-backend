@@ -67,6 +67,7 @@ public class DashboardService {
                 event.getId(),
                 event.getName(),
                 event.getEventDateTime(),
+                event.getVenue(),
                 metrics,
                 guestTable,
                 groupSummaries

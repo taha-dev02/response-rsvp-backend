@@ -13,6 +13,7 @@ public class EventDashboardResponse {
     private Long eventId;
     private String eventName;
     private LocalDateTime eventDateTime;
+    private String venue;
     private EventMetrics metrics;
     private List<GuestTableRow> guestTable;
     private List<GroupSummary> groupSummaries;
