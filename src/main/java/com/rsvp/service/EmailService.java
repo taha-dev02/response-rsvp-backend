@@ -15,9 +15,9 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String fromEmail;
 
-    @Value("${app.frontend-url}")
+    @Value("${frontend.url}")
     private String frontendUrl;
-
+    
     public void sendPasswordResetEmail(String to, String token) {
 
         String resetLink = frontendUrl + "/reset-password?token=" + token;
