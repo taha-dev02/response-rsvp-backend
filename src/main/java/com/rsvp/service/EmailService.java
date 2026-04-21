@@ -17,7 +17,7 @@ public class EmailService {
 
     @Value("${frontend.url}")
     private String frontendUrl;
-    
+
     public void sendPasswordResetEmail(String to, String token) {
 
         String resetLink = frontendUrl + "/reset-password?token=" + token;
