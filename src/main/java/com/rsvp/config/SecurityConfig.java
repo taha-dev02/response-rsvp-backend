@@ -77,12 +77,20 @@ public class SecurityConfig {
                         // ✅ PUBLIC TRACKING
                         .requestMatchers(HttpMethod.POST, "/api/tracking/**").permitAll()
 
+                        // ✅ PUBLIC AUTOMATION APPROVAL ENDPOINTS (accessed via email link, no login)
+                        .requestMatchers(HttpMethod.GET, "/api/automation/status/*").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/automation/approve/*").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/automation/reject/*").permitAll()
+
                         // Group RSVP sync (if still needed)
                         .requestMatchers(HttpMethod.POST, "/api/rsvps/group-sync").permitAll()
 
                         // ========== SYSTEM-ONLY ENDPOINTS ==========
                         .requestMatchers(HttpMethod.POST, "/api/rsvps/sync").hasRole("SYSTEM")
                         .requestMatchers(HttpMethod.POST, "/api/whatsapp/sync").hasRole("SYSTEM")
+
+                        // ========== AUTOMATION REQUEST (ADMIN & USER) ==========
+                        .requestMatchers(HttpMethod.POST, "/api/automation/request/*").hasAnyRole("ADMIN", "USER")
                         
                         // ========== WHATSAPP AUTOMATION (ADMIN & USER) ==========
                         .requestMatchers(HttpMethod.POST, "/api/whatsapp/trigger-automation").hasAnyRole("ADMIN", "USER")
