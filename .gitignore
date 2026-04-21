@@ -1,4 +1,4 @@
 .env
 *.properties
 *.log
-target/.env
+target/
